@@ -49,27 +49,48 @@
 				  				Error: '. $pic['error'][$i] .
 				  			'</div>';
 					} 
-					else //can be uploaded and added to DB
+					else //can be uploaded and added to DB no error
 					{
 						if(file_exists( $target_dir. $indi)){
-							// echo 	'<div class="alert alert-info mt-3" role="alert">'.
-					  // 					$indi . ' already exists, file overwritten'.
-					  // 				'</div>';
+							
+							if(isset($_POST['id'])) // the user id was sent
+							{
+								$id = $_POST['id'];
+								$query = "SELECT * FROM tbgallery WHERE user_id = '$id' AND filename = '$indi'";
+								$res = $mysqli->query($query);
+								if($row = mysqli_fetch_array($res)){
+									//alert("user has already saved this file do nothing");
+									echo '<div class="alert alert-info mt-3" role="alert">
+							  					'.$indi.' already uploaded.
+							  				</div>';
+								}else
+								{
+									//alert("user must save this file in db");
+									$sql = "INSERT INTO tbgallery (user_id, filename) 
+									VALUES (" . $_POST['id'] . ", '" . $indi . "');";
+									if ($mysqli->query($sql)) {
+										echo '<div class="alert alert-info mt-3" role="alert">
+							  					Upload of '.$indi.' successful.
+							  				</div>';
+									}
+
+								}
+							}
 						}else{
 							if(isset($_POST['id'])) // the user id was sent
-						{
-							$sql = "INSERT INTO tbgallery (user_id, filename) 
-							VALUES (" . $_POST['id'] . ", '" . $indi . "');";
-							if ($mysqli->query($sql)) {
-								//echo "New record created successfully";
-								echo '<div class="alert alert-info mt-3" role="alert">
-					  					Upload of '.$indi.' successful.
-					  				</div>';
-							} else {
-							//echo "Error: " . $sql . "<br>" . $mysqli->error;
+							{
+								$sql = "INSERT INTO tbgallery (user_id, filename) 
+								VALUES (" . $_POST['id'] . ", '" . $indi . "');";
+								if ($mysqli->query($sql)) {
+									//echo "New record created successfully";
+									echo '<div class="alert alert-info mt-3" role="alert">
+						  					Upload of '.$indi.' successful.
+						  				</div>';
+								} else {
 								//echo "Error: " . $sql . "<br>" . $mysqli->error;
+									//echo "Error: " . $sql . "<br>" . $mysqli->error;
+								}
 							}
-						}
 						}
 
 						move_uploaded_file($pic["tmp_name"][$i], $target_dir . $indi);
